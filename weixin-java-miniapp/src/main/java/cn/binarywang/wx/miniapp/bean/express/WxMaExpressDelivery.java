@@ -1,11 +1,13 @@
 package cn.binarywang.wx.miniapp.bean.express;
 
-import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
+import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import me.chanjar.weixin.common.util.json.GsonParser;
 
 import java.io.Serializable;
 import java.util.List;
@@ -18,8 +20,10 @@ import java.util.List;
  * @since 2019-11-26
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class WxMaExpressDelivery implements Serializable {
-  private static final JsonParser JSON_PARSER = new JsonParser();
+
   private static final long serialVersionUID = -8394544895730223810L;
 
   /**
@@ -59,7 +63,7 @@ public class WxMaExpressDelivery implements Serializable {
   private List<ServiceType> serviceType;
 
   public static List<WxMaExpressDelivery> fromJson(String json) {
-    JsonObject jsonObject = JSON_PARSER.parse(json).getAsJsonObject();
+    JsonObject jsonObject = GsonParser.parse(json);
     return WxMaGsonBuilder.create().fromJson(jsonObject.get("data").toString(),
       new TypeToken<List<WxMaExpressDelivery>>() {
       }.getType());

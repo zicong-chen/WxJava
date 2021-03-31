@@ -5,9 +5,10 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * Redis配置.
+ * redis 配置属性.
  *
- * @author someone
+ * @author <a href="https://github.com/binarywang">Binary Wang</a>
+ * @date 2020-08-30
  */
 @Data
 public class RedisProperties implements Serializable {
@@ -37,6 +38,16 @@ public class RedisProperties implements Serializable {
    * 数据库.
    */
   private int database = 0;
+
+  /**
+   * sentinel ips
+   */
+  private String sentinelIps;
+
+  /**
+   * sentinel name
+   */
+  private String sentinelName;
 
   private Integer maxActive;
   private Integer maxIdle;

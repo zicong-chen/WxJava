@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.w3c.dom.Document;
 
+import java.io.Serializable;
+
 /**
  * @author Wang GuangXin 2019/10/22 10:06
  * @version 1.0
@@ -15,7 +17,9 @@ import org.w3c.dom.Document;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @XStreamAlias("xml")
-public class ProfitSharingResult extends BaseWxPayResult {
+public class ProfitSharingResult extends BaseWxPayResult implements Serializable {
+  private static final long serialVersionUID = 7435709584788869456L;
+
   /**
    * 微信订单号.
    */
@@ -33,9 +37,9 @@ public class ProfitSharingResult extends BaseWxPayResult {
   private String orderId;
 
   @Override
-  protected void loadXML(Document d) {
-    transactionId = readXMLString(d, "transaction_id");
-    outOrderNo = readXMLString(d, "out_order_no");
-    orderId = readXMLString(d, "order_id");
+  protected void loadXml(Document d) {
+    transactionId = readXmlString(d, "transaction_id");
+    outOrderNo = readXmlString(d, "out_order_no");
+    orderId = readXmlString(d, "order_id");
   }
 }

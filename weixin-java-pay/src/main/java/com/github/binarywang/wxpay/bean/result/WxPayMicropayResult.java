@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.w3c.dom.Document;
 
+import java.io.Serializable;
+
 /**
  * <pre>
  * 提交刷卡支付接口响应结果对象类
@@ -18,7 +20,7 @@ import org.w3c.dom.Document;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @XStreamAlias("xml")
-public class WxPayMicropayResult extends BaseWxPayResult {
+public class WxPayMicropayResult extends BaseWxPayResult implements Serializable {
   private static final long serialVersionUID = 529670965722059189L;
 
   /**
@@ -46,6 +48,32 @@ public class WxPayMicropayResult extends BaseWxPayResult {
    **/
   @XStreamAlias("is_subscribe")
   private String isSubscribe;
+  
+  /**
+   * <pre>
+   * 用户子标识.
+   * sub_openid
+   * 否
+   * String(128)
+   * Y
+   * 子商户appid下用户唯一标识，如需返回则请求时需要传sub_appid
+   * </pre>
+   **/
+  @XStreamAlias("sub_openid")
+  private String subOpenid;
+
+  /**
+   * <pre>
+   * 是否关注子公众账号.
+   * sub_is_subscribe
+   * 否
+   * String(1)
+   * Y
+   * 用户是否关注子公众账号，仅在公众账号类型支付有效，取值范围：Y或N;Y-关注;N-未关注
+   * </pre>
+   **/
+  @XStreamAlias("sub_is_subscribe")
+  private String subIsSubscribe;
 
   /**
    * <pre>
@@ -222,22 +250,24 @@ public class WxPayMicropayResult extends BaseWxPayResult {
    * @param d Document
    */
   @Override
-  protected void loadXML(Document d) {
-    openid = readXMLString(d, "openid");
-    isSubscribe = readXMLString(d, "is_subscribe");
-    tradeType = readXMLString(d, "trade_type");
-    bankType = readXMLString(d, "bank_type");
-    feeType = readXMLString(d, "fee_type");
-    totalFee = readXMLInteger(d, "total_fee");
-    settlementTotalFee = readXMLInteger(d, "settlement_total_fee");
-    couponFee = readXMLInteger(d, "coupon_fee");
-    cashFeeType = readXMLString(d, "cash_fee_type");
-    cashFee = readXMLInteger(d, "cash_fee");
-    transactionId = readXMLString(d, "transaction_id");
-    outTradeNo = readXMLString(d, "out_trade_no");
-    attach = readXMLString(d, "attach");
-    timeEnd = readXMLString(d, "time_end");
-    promotionDetail = readXMLString(d, "promotion_detail");
+  protected void loadXml(Document d) {
+    openid = readXmlString(d, "openid");
+    isSubscribe = readXmlString(d, "is_subscribe");
+    subOpenid = readXmlString(d, "sub_openid");
+    subIsSubscribe = readXmlString(d, "sub_is_subscribe");
+    tradeType = readXmlString(d, "trade_type");
+    bankType = readXmlString(d, "bank_type");
+    feeType = readXmlString(d, "fee_type");
+    totalFee = readXmlInteger(d, "total_fee");
+    settlementTotalFee = readXmlInteger(d, "settlement_total_fee");
+    couponFee = readXmlInteger(d, "coupon_fee");
+    cashFeeType = readXmlString(d, "cash_fee_type");
+    cashFee = readXmlInteger(d, "cash_fee");
+    transactionId = readXmlString(d, "transaction_id");
+    outTradeNo = readXmlString(d, "out_trade_no");
+    attach = readXmlString(d, "attach");
+    timeEnd = readXmlString(d, "time_end");
+    promotionDetail = readXmlString(d, "promotion_detail");
   }
 
 }

@@ -5,7 +5,7 @@ import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.http.ProxyInfo;
 import jodd.util.StringPool;
-import me.chanjar.weixin.common.WxType;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.fs.FileUtils;
@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * .
@@ -47,7 +48,7 @@ public class JoddHttpMediaDownloadRequestExecutor extends BaseMediaDownloadReque
     request.withConnectionProvider(requestHttp.getRequestHttpClient());
 
     HttpResponse response = request.send();
-    response.charset(StringPool.UTF_8);
+    response.charset(StandardCharsets.UTF_8.name());
 
     String contentType = response.header("Content-Type");
     if (contentType != null && contentType.startsWith("application/json")) {
@@ -60,9 +61,14 @@ public class JoddHttpMediaDownloadRequestExecutor extends BaseMediaDownloadReque
       return null;
     }
 
+    String baseName = FilenameUtils.getBaseName(fileName);
+    if (StringUtils.isBlank(fileName) || baseName.length() < 3) {
+      baseName = String.valueOf(System.currentTimeMillis());
+    }
+
     try (InputStream inputStream = new ByteArrayInputStream(response.bodyBytes())) {
       return FileUtils.createTmpFile(inputStream,
-        FilenameUtils.getBaseName(fileName),
+        baseName,
         FilenameUtils.getExtension(fileName),
         super.tmpDirFile);
     }

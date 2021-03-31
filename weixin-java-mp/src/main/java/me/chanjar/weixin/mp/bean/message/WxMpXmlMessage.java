@@ -1,24 +1,24 @@
 package me.chanjar.weixin.mp.bean.message;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Serializable;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-
-import org.apache.commons.io.IOUtils;
-
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import me.chanjar.weixin.common.util.XmlUtils;
 import me.chanjar.weixin.common.util.xml.XStreamCDataConverter;
 import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 import me.chanjar.weixin.mp.util.crypto.WxMpCryptUtil;
 import me.chanjar.weixin.mp.util.json.WxMpGsonBuilder;
 import me.chanjar.weixin.mp.util.xml.XStreamTransformer;
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * <pre>
@@ -569,7 +569,7 @@ public class WxMpXmlMessage implements Serializable {
    * 审核成功时的时间（整形），时间戳
    */
   @XStreamAlias("SuccTime")
-  private Long succTime;
+  private Long successTime;
 
   /**
    * 审核失败的原因
@@ -645,6 +645,44 @@ public class WxMpXmlMessage implements Serializable {
   @XStreamAlias("bizmsgmenuid")
   private String bizMsgMenuId;
 
+  /*------------------ 电子发票 ------------------*/
+  /**
+   * 授权成功的订单号，与失败订单号两者必显示其一
+   */
+  @XStreamAlias("SuccOrderId")
+  private String succOrderId;
+
+  /**
+   * 授权失败的订单号，与成功订单号两者必显示其一
+   */
+  @XStreamAlias("FailOrderId")
+  private String failOrderId;
+
+  /**
+   * 获取授权页链接的AppId
+   */
+  @XStreamAlias("AuthorizeAppId")
+  private String authorizeAppId;
+
+  /**
+   * 授权来源，web：公众号开票，app：app开票，wxa：小程序开票，wap：h5开票
+   */
+  @XStreamAlias("source")
+  private String source;
+
+  /**
+   * 发票请求流水号，唯一识别发票请求的流水号
+   */
+  @XStreamAlias("fpqqlsh")
+  private String fpqqlsh;
+
+  /**
+   * 纳税人识别码
+   */
+  @XStreamAlias("nsrsbh")
+  private String nsrsbh;
+
+
   public static WxMpXmlMessage fromXml(String xml) {
     //修改微信变态的消息内容格式，方便解析
     xml = xml.replace("</PicList><PicList>", "");
@@ -679,7 +717,7 @@ public class WxMpXmlMessage implements Serializable {
     try {
       return fromEncryptedXml(IOUtils.toString(is, StandardCharsets.UTF_8), wxMpConfigStorage, timestamp, nonce, msgSignature);
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new WxRuntimeException(e);
     }
   }
 

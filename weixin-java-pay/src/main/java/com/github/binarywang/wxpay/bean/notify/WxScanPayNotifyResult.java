@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.w3c.dom.Document;
 
+import java.io.Serializable;
+
 /**
  * <pre>
  * 扫码支付通知回调类.
@@ -19,7 +21,7 @@ import org.w3c.dom.Document;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @XStreamAlias("xml")
-public class WxScanPayNotifyResult extends BaseWxPayResult {
+public class WxScanPayNotifyResult extends BaseWxPayResult implements Serializable {
   private static final long serialVersionUID = 3381324564266118986L;
 
   /**
@@ -47,10 +49,10 @@ public class WxScanPayNotifyResult extends BaseWxPayResult {
   private String productId;
 
   @Override
-  protected void loadXML(Document d) {
-    openid = readXMLString(d, "openid");
-    isSubscribe = readXMLString(d, "is_subscribe");
-    productId = readXMLString(d, "product_id");
+  protected void loadXml(Document d) {
+    openid = readXmlString(d, "openid");
+    isSubscribe = readXmlString(d, "is_subscribe");
+    productId = readXmlString(d, "product_id");
   }
 
 }

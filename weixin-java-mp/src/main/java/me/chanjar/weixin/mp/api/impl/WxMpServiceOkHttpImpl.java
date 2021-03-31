@@ -1,15 +1,15 @@
 package me.chanjar.weixin.mp.api.impl;
 
-import me.chanjar.weixin.common.WxType;
-import me.chanjar.weixin.common.bean.WxAccessToken;
-import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import me.chanjar.weixin.common.util.http.HttpType;
 import me.chanjar.weixin.common.util.http.okhttp.OkHttpProxyInfo;
 import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static me.chanjar.weixin.mp.enums.WxMpApiUrl.Other.GET_ACCESS_TOKEN_URL;
@@ -46,28 +46,27 @@ public class WxMpServiceOkHttpImpl extends BaseWxMpServiceImpl<OkHttpClient, OkH
     }
 
     Lock lock = config.getAccessTokenLock();
-    lock.lock();
+    boolean locked = false;
     try {
-      if (!config.isAccessTokenExpired() && !forceRefresh) {
-        return config.getAccessToken();
-      }
+      do {
+        locked = lock.tryLock(100, TimeUnit.MILLISECONDS);
+        if (!forceRefresh && !config.isAccessTokenExpired()) {
+          return config.getAccessToken();
+        }
+      } while (!locked);
       String url = String.format(GET_ACCESS_TOKEN_URL.getUrl(config), config.getAppId(), config.getSecret());
 
       Request request = new Request.Builder().url(url).get().build();
       Response response = getRequestHttpClient().newCall(request).execute();
-      String resultContent = response.body().string();
-      WxError error = WxError.fromJson(resultContent, WxType.MP);
-      if (error.getErrorCode() != 0) {
-        throw new WxErrorException(error);
-      }
-      WxAccessToken accessToken = WxAccessToken.fromJson(resultContent);
-      config.updateAccessToken(accessToken.getAccessToken(), accessToken.getExpiresIn());
-
-      return config.getAccessToken();
+      return this.extractAccessToken(Objects.requireNonNull(response.body()).string());
     } catch (IOException e) {
-      throw new RuntimeException(e);
+      throw new WxRuntimeException(e);
+    } catch (InterruptedException e) {
+      throw new WxRuntimeException(e);
     } finally {
-      lock.unlock();
+      if (locked) {
+        lock.unlock();
+      }
     }
   }
 

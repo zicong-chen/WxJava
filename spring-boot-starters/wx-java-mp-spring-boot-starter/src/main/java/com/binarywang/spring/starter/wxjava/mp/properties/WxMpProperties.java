@@ -1,13 +1,15 @@
 package com.binarywang.spring.starter.wxjava.mp.properties;
 
+import com.binarywang.spring.starter.wxjava.mp.enums.HttpClientType;
+import com.binarywang.spring.starter.wxjava.mp.enums.StorageType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 import java.io.Serializable;
 
+import static com.binarywang.spring.starter.wxjava.mp.enums.StorageType.Memory;
 import static com.binarywang.spring.starter.wxjava.mp.properties.WxMpProperties.PREFIX;
-import static com.binarywang.spring.starter.wxjava.mp.properties.WxMpProperties.StorageType.memory;
-
 
 /**
  * 微信接入相关配置属性.
@@ -40,29 +42,60 @@ public class WxMpProperties {
   private String aesKey;
 
   /**
-   * 存储策略, memory, redis.
+   * 自定义host配置
    */
-  private ConfigStorage configStorage = new ConfigStorage();
+  private HostConfig hosts;
 
+  /**
+   * 存储策略
+   */
+  private final ConfigStorage configStorage = new ConfigStorage();
 
   @Data
   public static class ConfigStorage implements Serializable {
     private static final long serialVersionUID = 4815731027000065434L;
 
-    private StorageType type = memory;
+    /**
+     * 存储类型.
+     */
+    private StorageType type = Memory;
 
-    private RedisProperties redis = new RedisProperties();
+    /**
+     * 指定key前缀.
+     */
+    private String keyPrefix = "wx";
+
+    /**
+     * redis连接配置.
+     */
+    @NestedConfigurationProperty
+    private final RedisProperties redis = new RedisProperties();
+
+    /**
+     * http客户端类型.
+     */
+    private HttpClientType httpClientType = HttpClientType.HttpClient;
+
+    /**
+     * http代理主机.
+     */
+    private String httpProxyHost;
+
+    /**
+     * http代理端口.
+     */
+    private Integer httpProxyPort;
+
+    /**
+     * http代理用户名.
+     */
+    private String httpProxyUsername;
+
+    /**
+     * http代理密码.
+     */
+    private String httpProxyPassword;
 
   }
 
-  public enum StorageType {
-    /**
-     * 内存.
-     */
-    memory,
-    /**
-     * redis.
-     */
-    redis
-  }
 }

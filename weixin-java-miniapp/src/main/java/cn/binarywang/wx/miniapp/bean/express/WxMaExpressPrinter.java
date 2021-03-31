@@ -1,9 +1,10 @@
 package cn.binarywang.wx.miniapp.bean.express;
 
-import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
-import com.google.gson.JsonParser;
+import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
 import com.google.gson.annotations.SerializedName;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,9 +17,11 @@ import java.util.List;
  * @since 2019-11-26
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class WxMaExpressPrinter implements Serializable {
 
-  private static final JsonParser JSON_PARSER = new JsonParser();
+
   private static final long serialVersionUID = 7164449984700322531L;
 
   /**

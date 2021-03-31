@@ -9,6 +9,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import me.chanjar.weixin.common.util.BeanUtils;
 import me.chanjar.weixin.common.util.json.WxGsonBuilder;
 import me.chanjar.weixin.common.util.xml.XStreamInitializer;
@@ -171,6 +172,13 @@ public abstract class BaseWxPayRequest implements Serializable {
   protected abstract void checkConstraints() throws WxPayException;
 
   /**
+   * 是否需要nonce_str
+   */
+  protected boolean needNonceStr() {
+    return true;
+  }
+
+  /**
    * 如果配置中已经设置，可以不设置值.
    *
    * @param appid 微信公众号appid
@@ -221,8 +229,6 @@ public abstract class BaseWxPayRequest implements Serializable {
 
   /**
    * 使用快速算法组装xml
-   *
-   * @return
    */
   private String toFastXml() {
     try {
@@ -241,7 +247,7 @@ public abstract class BaseWxPayRequest implements Serializable {
 
       return document.asXML();
     } catch (Exception e) {
-      throw new RuntimeException("generate xml error", e);
+      throw new WxRuntimeException("generate xml error", e);
     }
   }
 
@@ -297,7 +303,7 @@ public abstract class BaseWxPayRequest implements Serializable {
    * 注意：不含sign属性
    */
   public Map<String, String> getSignParams() {
-    Map<String, String> map = new HashMap<>();
+    Map<String, String> map = new HashMap<>(8);
     map.put("appid", appid);
     map.put("mch_id", mchId);
     map.put("sub_appid", subAppId);
@@ -365,7 +371,7 @@ public abstract class BaseWxPayRequest implements Serializable {
       }
     }
 
-    if (StringUtils.isBlank(getNonceStr())) {
+    if (needNonceStr() && StringUtils.isBlank(getNonceStr())) {
       this.setNonceStr(String.valueOf(System.currentTimeMillis()));
     }
 

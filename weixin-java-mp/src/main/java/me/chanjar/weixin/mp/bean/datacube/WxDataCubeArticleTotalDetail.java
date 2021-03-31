@@ -198,4 +198,29 @@ public class WxDataCubeArticleTotalDetail implements Serializable {
   @SerializedName("feed_share_from_other_cnt")
   private Integer feedShareFromOtherCnt;
 
+
+  /**
+   * 看一看来源阅读人数
+   */
+  @SerializedName("int_page_from_kanyikan_read_user")
+  private Integer intPageFromKanyikanReadUser;
+
+  /**
+   * 看一看来源阅读次数
+   */
+  @SerializedName("int_page_from_kanyikan_read_count")
+  private Integer intPageFromKanyikanReadCount;
+
+  /**
+   * 搜一搜来源阅读人数
+   */
+  @SerializedName("int_page_from_souyisou_read_user")
+  private Integer intPageFromSouyisouReadUser;
+
+  /**
+   *  搜一搜来源阅读次数
+   */
+  @SerializedName("int_page_from_souyisou_read_count")
+  private Integer intPageFromSouyisouReadCount;
+
 }

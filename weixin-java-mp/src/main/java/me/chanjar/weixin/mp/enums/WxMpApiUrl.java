@@ -1,9 +1,11 @@
 package me.chanjar.weixin.mp.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import me.chanjar.weixin.mp.config.WxMpHostConfig;
 import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 
-import static me.chanjar.weixin.mp.bean.WxMpHostConfig.*;
+import static me.chanjar.weixin.mp.config.WxMpHostConfig.*;
 
 /**
  * <pre>
@@ -21,9 +23,31 @@ public interface WxMpApiUrl {
    * @param config 微信公众号配置
    * @return api地址
    */
-  String getUrl(WxMpConfigStorage config);
+  default String getUrl(WxMpConfigStorage config) {
+    WxMpHostConfig hostConfig = null;
+    if (config != null) {
+      hostConfig = config.getHostConfig();
+    }
+    return buildUrl(hostConfig, this.getPrefix(), this.getPath());
+
+  }
+
+  /**
+   * the path
+   *
+   * @return path
+   */
+  String getPath();
+
+  /**
+   * the prefix
+   *
+   * @return prefix
+   */
+  String getPrefix();
 
   @AllArgsConstructor
+  @Getter
   enum Device implements WxMpApiUrl {
     /**
      * get_bind_device.
@@ -62,17 +86,41 @@ public interface WxMpApiUrl {
      */
     DEVICE_TRANSMSG(API_DEFAULT_HOST_URL, "/device/transmsg");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
+  }
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
+  @AllArgsConstructor
+  @Getter
+  enum OAuth2 implements WxMpApiUrl {
+    /**
+     * 用code换取oauth2的access token.
+     */
+    OAUTH2_ACCESS_TOKEN_URL(API_DEFAULT_HOST_URL, "/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"),
+    /**
+     * 刷新oauth2的access token.
+     */
+    OAUTH2_REFRESH_TOKEN_URL(API_DEFAULT_HOST_URL, "/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s"),
+    /**
+     * 用oauth2获取用户信息.
+     */
+    OAUTH2_USERINFO_URL(API_DEFAULT_HOST_URL, "/sns/userinfo?access_token=%s&openid=%s&lang=%s"),
+    /**
+     * 验证oauth2的access token是否有效.
+     */
+    OAUTH2_VALIDATE_TOKEN_URL(API_DEFAULT_HOST_URL, "/sns/auth?access_token=%s&openid=%s"),
+    /**
+     * oauth2授权的url连接.
+     */
+    CONNECT_OAUTH2_AUTHORIZE_URL(OPEN_DEFAULT_HOST_URL, "/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&connect_redirect=1#wechat_redirect");
+
+    private final String prefix;
+    private final String path;
 
   }
 
   @AllArgsConstructor
+  @Getter
   enum Other implements WxMpApiUrl {
     /**
      * 获取access_token.
@@ -91,22 +139,6 @@ public interface WxMpApiUrl {
      */
     SEMANTIC_SEMPROXY_SEARCH_URL(API_DEFAULT_HOST_URL, "/semantic/semproxy/search"),
     /**
-     * 用code换取oauth2的access token.
-     */
-    OAUTH2_ACCESS_TOKEN_URL(API_DEFAULT_HOST_URL, "/sns/oauth2/access_token?appid=%s&secret=%s&code=%s&grant_type=authorization_code"),
-    /**
-     * 刷新oauth2的access token.
-     */
-    OAUTH2_REFRESH_TOKEN_URL(API_DEFAULT_HOST_URL, "/sns/oauth2/refresh_token?appid=%s&grant_type=refresh_token&refresh_token=%s"),
-    /**
-     * 用oauth2获取用户信息.
-     */
-    OAUTH2_USERINFO_URL(API_DEFAULT_HOST_URL, "/sns/userinfo?access_token=%s&openid=%s&lang=%s"),
-    /**
-     * 验证oauth2的access token是否有效.
-     */
-    OAUTH2_VALIDATE_TOKEN_URL(API_DEFAULT_HOST_URL, "/sns/auth?access_token=%s&openid=%s"),
-    /**
      * 获取微信服务器IP地址.
      */
     GET_CALLBACK_IP_URL(API_DEFAULT_HOST_URL, "/cgi-bin/getcallbackip"),
@@ -119,10 +151,6 @@ public interface WxMpApiUrl {
      */
     QRCONNECT_URL(OPEN_DEFAULT_HOST_URL, "/connect/qrconnect?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s#wechat_redirect"),
     /**
-     * oauth2授权的url连接.
-     */
-    CONNECT_OAUTH2_AUTHORIZE_URL(OPEN_DEFAULT_HOST_URL, "/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=%s&state=%s&connect_redirect=1#wechat_redirect"),
-    /**
      * 获取公众号的自动回复规则.
      */
     GET_CURRENT_AUTOREPLY_INFO_URL(API_DEFAULT_HOST_URL, "/cgi-bin/get_current_autoreply_info"),
@@ -131,16 +159,13 @@ public interface WxMpApiUrl {
      */
     CLEAR_QUOTA_URL(API_DEFAULT_HOST_URL, "/cgi-bin/clear_quota");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Marketing implements WxMpApiUrl {
     /**
      * sets add.
@@ -159,16 +184,13 @@ public interface WxMpApiUrl {
      */
     WECHAT_AD_LEADS_GET(API_DEFAULT_HOST_URL, "/marketing/wechat_ad_leads/get");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Menu implements WxMpApiUrl {
     /**
      * get_current_selfmenu_info.
@@ -199,17 +221,13 @@ public interface WxMpApiUrl {
      */
     MENU_ADDCONDITIONAL(API_DEFAULT_HOST_URL, "/cgi-bin/menu/addconditional");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
-
   @AllArgsConstructor
+  @Getter
   enum Qrcode implements WxMpApiUrl {
     /**
      * create.
@@ -224,16 +242,13 @@ public interface WxMpApiUrl {
      */
     SHOW_QRCODE_WITH_TICKET(MP_DEFAULT_HOST_URL, "/cgi-bin/showqrcode?ticket=%s");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum ShakeAround implements WxMpApiUrl {
     /**
      * getshakeinfo.
@@ -252,36 +267,61 @@ public interface WxMpApiUrl {
      */
     SHAKEAROUND_RELATION_SEARCH(API_DEFAULT_HOST_URL, "/shakearound/relation/search");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum SubscribeMsg implements WxMpApiUrl {
     /**
      * subscribemsg.
      */
     SUBSCRIBE_MESSAGE_AUTHORIZE_URL(MP_DEFAULT_HOST_URL, "/mp/subscribemsg?action=get_confirm&appid=%s&scene=%d&template_id=%s&redirect_url=%s&reserved=%s#wechat_redirect"),
     /**
-     * subscribe.
+     * subscribe once.
      */
-    SEND_MESSAGE_URL(API_DEFAULT_HOST_URL, "/cgi-bin/message/template/subscribe");
+    SEND_MESSAGE_ONCE_URL(API_DEFAULT_HOST_URL, "/cgi-bin/message/template/subscribe"),
+    /**
+     * 订阅通知消息发送.
+     */
+    SEND_SUBSCRIBE_MESSAGE_URL(API_DEFAULT_HOST_URL, "/cgi-bin/message/subscribe/bizsend"),
+    /**
+     * 获取模板标题下的关键词列表.
+     */
+      GET_PUB_TEMPLATE_TITLE_LIST_URL (API_DEFAULT_HOST_URL,  "/wxaapi/newtmpl/getpubtemplatetitles"),
+    /**
+     * 获取模板标题下的关键词列表.
+     */
+      GET_PUB_TEMPLATE_KEY_WORDS_BY_ID_URL (API_DEFAULT_HOST_URL,  "/wxaapi/newtmpl/getpubtemplatekeywords"),
+    /**
+     * 组合模板并添加至帐号下的个人模板库.
+     */
+      TEMPLATE_ADD_URL(API_DEFAULT_HOST_URL,  "/wxaapi/newtmpl/addtemplate"),
+    /**
+     * 获取当前帐号下的个人模板列表.
+     */
+      TEMPLATE_LIST_URL(API_DEFAULT_HOST_URL,  "/wxaapi/newtmpl/gettemplate"),
+    /**
+     * 删除帐号下的某个模板.
+     */
+    TEMPLATE_DEL_URL(API_DEFAULT_HOST_URL,  "/wxaapi/newtmpl/deltemplate"),
+    /**
+     * 获取小程序账号的类目
+     */
+    GET_CATEGORY_URL (API_DEFAULT_HOST_URL,  "/wxaapi/newtmpl/getcategory"),
+    UNIFORM_MSG_SEND_URL(API_DEFAULT_HOST_URL, "/cgi-bin/message/wxopen/template/uniform_send"),
+    ACTIVITY_ID_CREATE_URL(API_DEFAULT_HOST_URL, "/cgi-bin/message/wxopen/activityid/create"),
+    UPDATABLE_MSG_SEND_URL(API_DEFAULT_HOST_URL, "/cgi-bin/message/wxopen/updatablemsg/send");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum TemplateMsg implements WxMpApiUrl {
     /**
      * send.
@@ -308,16 +348,13 @@ public interface WxMpApiUrl {
      */
     TEMPLATE_DEL_PRIVATE_TEMPLATE(API_DEFAULT_HOST_URL, "/cgi-bin/template/del_private_template");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum UserBlacklist implements WxMpApiUrl {
     /**
      * getblacklist.
@@ -332,16 +369,13 @@ public interface WxMpApiUrl {
      */
     BATCHUNBLACKLIST(API_DEFAULT_HOST_URL, "/cgi-bin/tags/members/batchunblacklist");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum UserTag implements WxMpApiUrl {
     /**
      * create.
@@ -376,16 +410,13 @@ public interface WxMpApiUrl {
      */
     TAGS_GETIDLIST(API_DEFAULT_HOST_URL, "/cgi-bin/tags/getidlist");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Wifi implements WxMpApiUrl {
     /**
      * list.
@@ -402,16 +433,13 @@ public interface WxMpApiUrl {
      */
     BIZWIFI_SHOP_UPDATE(API_DEFAULT_HOST_URL, "/bizwifi/shop/update");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum AiOpen implements WxMpApiUrl {
     /**
      * translatecontent.
@@ -426,16 +454,13 @@ public interface WxMpApiUrl {
      */
     VOICE_QUERY_RESULT_URL(API_DEFAULT_HOST_URL, "/cgi-bin/media/voice/queryrecoresultfortext");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Ocr implements WxMpApiUrl {
     /**
      * 身份证识别.
@@ -493,20 +518,13 @@ public interface WxMpApiUrl {
      */
     FILE_COMM(API_DEFAULT_HOST_URL, "/cv/ocr/comm");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      if (config == null) {
-        return buildUrl(null, prefix, path);
-      }
-
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Card implements WxMpApiUrl {
     /**
      * create.
@@ -603,16 +621,13 @@ public interface WxMpApiUrl {
     CARD_USER_CARD_LIST(API_DEFAULT_HOST_URL, "/card/user/getcardlist"),
     ;
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum DataCube implements WxMpApiUrl {
     /**
      * getusersummary.
@@ -683,16 +698,13 @@ public interface WxMpApiUrl {
      */
     GET_INTERFACE_SUMMARY_HOUR(API_DEFAULT_HOST_URL, "/datacube/getinterfacesummaryhour");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Kefu implements WxMpApiUrl {
     /**
      * send.
@@ -755,16 +767,13 @@ public interface WxMpApiUrl {
      */
     CUSTOM_TYPING(API_DEFAULT_HOST_URL, "/cgi-bin/message/custom/typing");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum MassMessage implements WxMpApiUrl {
     /**
      * 上传群发用的图文消息.
@@ -809,16 +818,13 @@ public interface WxMpApiUrl {
      */
     MESSAGE_MASS_GET_URL(API_DEFAULT_HOST_URL, "/cgi-bin/message/mass/get");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Material implements WxMpApiUrl {
     /**
      * get.
@@ -865,16 +871,13 @@ public interface WxMpApiUrl {
      */
     MATERIAL_BATCHGET_URL(API_DEFAULT_HOST_URL, "/cgi-bin/material/batchget_material");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum MemberCard implements WxMpApiUrl {
     /**
      * create.
@@ -910,16 +913,13 @@ public interface WxMpApiUrl {
      */
     MEMBER_CARD_ACTIVATE_TEMP_INFO(API_DEFAULT_HOST_URL, "/card/membercard/activatetempinfo/get");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Store implements WxMpApiUrl {
     /**
      * getwxcategory.
@@ -946,16 +946,13 @@ public interface WxMpApiUrl {
      */
     POI_ADD_URL(API_DEFAULT_HOST_URL, "/cgi-bin/poi/addpoi");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum User implements WxMpApiUrl {
     /**
      * batchget.
@@ -978,16 +975,13 @@ public interface WxMpApiUrl {
      */
     USER_CHANGE_OPENID_URL(API_DEFAULT_HOST_URL, "/cgi-bin/changeopenid");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
   @AllArgsConstructor
+  @Getter
   enum Comment implements WxMpApiUrl {
     /**
      * 打开已群发文章评论.
@@ -1002,18 +996,40 @@ public interface WxMpApiUrl {
     /**
      * 查看指定文章的评论数据.
      */
-    LIST(API_DEFAULT_HOST_URL, "/cgi-bin/comment/list");
+    LIST(API_DEFAULT_HOST_URL, "/cgi-bin/comment/list"),
 
-    private String prefix;
-    private String path;
+    /**
+     * 将评论标记精选.
+     */
+    MARK_ELECT(API_DEFAULT_HOST_URL, "/cgi-bin/comment/markelect"),
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
+    /**
+     * 将评论取消精选.
+     */
+    UNMARK_ELECT(API_DEFAULT_HOST_URL, "/cgi-bin/comment/unmarkelect"),
+
+    /**
+     * 删除评论.
+     */
+    DELETE(API_DEFAULT_HOST_URL, "/cgi-bin/comment/delete"),
+
+    /**
+     * 回复评论.
+     */
+    REPLY_ADD(API_DEFAULT_HOST_URL, "/cgi-bin/comment/reply/add"),
+
+    /**
+     * 删除回复.
+     */
+    REPLY_DELETE(API_DEFAULT_HOST_URL, "/cgi-bin/comment/reply/delete");
+
+    private final String prefix;
+    private final String path;
+
   }
 
   @AllArgsConstructor
+  @Getter
   enum ImgProc implements WxMpApiUrl {
     /**
      * 二维码/条码识别
@@ -1045,16 +1061,128 @@ public interface WxMpApiUrl {
      */
     FILE_AI_CROP(API_DEFAULT_HOST_URL, "/cv/img/aicrop?ratios=%s");
 
-    private String prefix;
-    private String path;
+    private final String prefix;
+    private final String path;
 
-    @Override
-    public String getUrl(WxMpConfigStorage config) {
-      if (null == config) {
-        return buildUrl(null, prefix, path);
-      }
-      return buildUrl(config.getHostConfig(), prefix, path);
-    }
   }
 
+  @AllArgsConstructor
+  @Getter
+  enum Invoice implements WxMpApiUrl {
+
+    /**
+     * 获取用户开票授权地址
+     */
+    GET_AUTH_URL(API_DEFAULT_HOST_URL, "/card/invoice/getauthurl"),
+
+    /**
+     * 获取用户开票授权信息
+     */
+    GET_AUTH_DATA(API_DEFAULT_HOST_URL, "/card/invoice/getauthdata"),
+
+    /**
+     * 拒绝为用户开票
+     */
+    REJECT_INSERT(API_DEFAULT_HOST_URL, "/card/invoice/rejectinsert"),
+
+    /**
+     * 开票
+     */
+    MAKE_OUT_INVOICE(API_DEFAULT_HOST_URL, "/card/invoice/makeoutinvoice"),
+
+    /**
+     * 发票冲红
+     */
+    CLEAR_OUT_INVOICE(API_DEFAULT_HOST_URL, "/card/invoice/clearoutinvoice"),
+
+    /**
+     * 查询发票信息
+     */
+    QUERY_INVOICE_INFO(API_DEFAULT_HOST_URL, "/card/invoice/queryinvoceinfo"),
+
+    /**
+     * 设置商户信息联系
+     */
+    SET_CONTACT_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=set_contact"),
+
+    /**
+     * 获取商户联系信息
+     */
+    GET_CONTACT_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=get_contact"),
+
+    /**
+     * 设置授权页面字段
+     */
+    SET_AUTH_FIELD_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=set_auth_field"),
+
+    /**
+     * 获取授权页面字段
+     */
+    GET_AUTH_FIELD_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=get_auth_field"),
+
+    /**
+     * 设置关联商户
+     */
+    SET_PAY_MCH_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=set_pay_mch"),
+
+    /**
+     * 获取关联商户
+     */
+    GET_PAY_MCH_SET_BIZ_ATTR(API_DEFAULT_HOST_URL, "/card/invoice/setbizattr?action=get_pay_mch"),
+
+    /**
+     * 报销方查询报销发票信息
+     */
+    GET_INVOICE_INFO(API_DEFAULT_HOST_URL,"/card/invoice/reimburse/getinvoiceinfo"),
+
+    /**
+     * 报销方批量查询报销发票信息
+     */
+    GET_INVOICE_BATCH(API_DEFAULT_HOST_URL,"/card/invoice/reimburse/getinvoicebatch"),
+
+    /**
+     * 报销方更新发票状态
+     */
+    UPDATE_INVOICE_STATUS(API_DEFAULT_HOST_URL,"/card/invoice/reimburse/updateinvoicestatus"),
+
+    /**
+     * 报销方批量更新发票状态
+     */
+    UPDATE_STATUS_BATCH(API_DEFAULT_HOST_URL,"/card/invoice/reimburse/updatestatusbatch"),
+    ;
+    private final String prefix;
+    private final String path;
+
+  }
+
+  /**
+   * 对话能力
+   */
+  @AllArgsConstructor
+  @Getter
+  enum Guide implements WxMpApiUrl {
+    /**
+     * 添加顾问
+     */
+    ADD_GUIDE(API_DEFAULT_HOST_URL, "/cgi-bin/guide/addguideacct"),
+    /**
+     * 修改顾问
+     */
+    UPDATE_GUIDE(API_DEFAULT_HOST_URL, "/cgi-bin/guide/updateguideacct"),
+    /**
+     * 获取顾问信息
+     */
+    GET_GUIDE(API_DEFAULT_HOST_URL, "/cgi-bin/guide/getguideacct"),
+    /**
+     * 删除顾问
+     */
+    DEL_GUIDE(API_DEFAULT_HOST_URL, "/cgi-bin/guide/delguideacct"),
+    /**
+     * 获取服务号顾问列表
+     */
+    LIST_GUIDE(API_DEFAULT_HOST_URL, "/cgi-bin/guide/getguideacctlist");
+    private final String prefix;
+    private final String path;
+
+  }
 }

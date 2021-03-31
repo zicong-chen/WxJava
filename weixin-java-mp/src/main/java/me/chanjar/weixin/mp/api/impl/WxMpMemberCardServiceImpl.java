@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
-import me.chanjar.weixin.mp.bean.membercard.*;
+import me.chanjar.weixin.mp.bean.card.membercard.*;
 import me.chanjar.weixin.mp.enums.WxMpApiUrl;
 import org.apache.commons.lang3.StringUtils;
 
@@ -24,11 +24,11 @@ import me.chanjar.weixin.mp.bean.card.AdvancedInfo;
 import me.chanjar.weixin.mp.bean.card.BaseInfo;
 import me.chanjar.weixin.mp.bean.card.CardUpdateResult;
 import me.chanjar.weixin.mp.bean.card.DateInfo;
-import me.chanjar.weixin.mp.bean.card.MemberCard;
-import me.chanjar.weixin.mp.bean.card.MemberCardActivateUserFormRequest;
-import me.chanjar.weixin.mp.bean.card.MemberCardActivateUserFormResult;
-import me.chanjar.weixin.mp.bean.card.MemberCardCreateRequest;
-import me.chanjar.weixin.mp.bean.card.MemberCardUpdateRequest;
+import me.chanjar.weixin.mp.bean.card.membercard.MemberCard;
+import me.chanjar.weixin.mp.bean.card.membercard.MemberCardActivateUserFormRequest;
+import me.chanjar.weixin.mp.bean.card.membercard.MemberCardActivateUserFormResult;
+import me.chanjar.weixin.mp.bean.card.membercard.MemberCardCreateRequest;
+import me.chanjar.weixin.mp.bean.card.membercard.MemberCardUpdateRequest;
 import me.chanjar.weixin.mp.bean.card.WxMpCardCreateResult;
 import me.chanjar.weixin.mp.bean.card.enums.BusinessServiceType;
 import me.chanjar.weixin.mp.bean.card.enums.CardColor;
@@ -188,7 +188,7 @@ public class WxMpMemberCardServiceImpl implements WxMpMemberCardService {
         dateInfoType.getDescription()));
     }
 
-    if (!baseInfo.isUseAllLocations() && StringUtils.isBlank(baseInfo.getLocationIdList())) {
+    if (!baseInfo.isUseAllLocations() && baseInfo.getLocationIdList().isEmpty()) {
       return WxMpCardCreateResult.failure("会员卡基本信息的门店使用范围选择指定门店,门店列表:locationIdList不能为空");
     }
 

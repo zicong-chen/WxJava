@@ -1,14 +1,15 @@
 package me.chanjar.weixin.mp.api.impl;
 
-import jodd.http.*;
+import jodd.http.HttpConnectionProvider;
+import jodd.http.HttpRequest;
+import jodd.http.ProxyInfo;
 import jodd.http.net.SocketHttpConnectionProvider;
-import me.chanjar.weixin.common.WxType;
-import me.chanjar.weixin.common.bean.WxAccessToken;
-import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import me.chanjar.weixin.common.util.http.HttpType;
 import me.chanjar.weixin.mp.config.WxMpConfigStorage;
 
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
 import static me.chanjar.weixin.mp.enums.WxMpApiUrl.Other.GET_ACCESS_TOKEN_URL;
@@ -46,7 +47,7 @@ public class WxMpServiceJoddHttpImpl extends BaseWxMpServiceImpl<HttpConnectionP
       httpProxy = new ProxyInfo(ProxyInfo.ProxyType.HTTP, configStorage.getHttpProxyHost(), configStorage.getHttpProxyPort(), configStorage.getHttpProxyUsername(), configStorage.getHttpProxyPassword());
     }
 
-    httpClient = JoddHttp.httpConnectionProvider;
+    httpClient = new SocketHttpConnectionProvider();
   }
 
   @Override
@@ -57,33 +58,31 @@ public class WxMpServiceJoddHttpImpl extends BaseWxMpServiceImpl<HttpConnectionP
     }
 
     Lock lock = config.getAccessTokenLock();
-    lock.lock();
+    boolean locked = false;
     try {
-      if (!config.isAccessTokenExpired() && !forceRefresh) {
-        return config.getAccessToken();
-      }
+      do {
+        locked = lock.tryLock(100, TimeUnit.MILLISECONDS);
+        if (!forceRefresh && !config.isAccessTokenExpired()) {
+          return config.getAccessToken();
+        }
+      } while (!locked);
       String url = String.format(GET_ACCESS_TOKEN_URL.getUrl(config), config.getAppId(), config.getSecret());
 
       HttpRequest request = HttpRequest.get(url);
-
       if (this.getRequestHttpProxy() != null) {
         SocketHttpConnectionProvider provider = new SocketHttpConnectionProvider();
         provider.useProxy(getRequestHttpProxy());
 
         request.withConnectionProvider(provider);
       }
-      HttpResponse response = request.send();
-      String resultContent = response.bodyText();
-      WxError error = WxError.fromJson(resultContent, WxType.MP);
-      if (error.getErrorCode() != 0) {
-        throw new WxErrorException(error);
-      }
-      WxAccessToken accessToken = WxAccessToken.fromJson(resultContent);
-      config.updateAccessToken(accessToken.getAccessToken(), accessToken.getExpiresIn());
 
-      return config.getAccessToken();
+      return this.extractAccessToken(request.send().bodyText());
+    } catch (InterruptedException e) {
+      throw new WxRuntimeException(e);
     } finally {
-      lock.unlock();
+      if (locked) {
+        lock.unlock();
+      }
     }
   }
 

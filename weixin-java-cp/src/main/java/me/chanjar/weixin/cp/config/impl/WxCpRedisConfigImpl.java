@@ -9,15 +9,19 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.File;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * <pre>
  *    使用说明：本实现仅供参考，并不完整.
  *    比如为减少项目依赖，未加入redis分布式锁的实现，如有需要请自行实现。
  * </pre>
+ * @deprecated 不建议使用，如有需要，请自行改造实现，加入到自己的项目中并引用
  *
  * @author gaigeshen
  */
+@Deprecated
 public class WxCpRedisConfigImpl implements WxCpConfigStorage {
   private static final String ACCESS_TOKEN_KEY = "WX_CP_ACCESS_TOKEN";
   private static final String ACCESS_TOKEN_EXPIRES_TIME_KEY = "WX_CP_ACCESS_TOKEN_EXPIRES_TIME";
@@ -41,6 +45,8 @@ public class WxCpRedisConfigImpl implements WxCpConfigStorage {
   private volatile ApacheHttpClientBuilder apacheHttpClientBuilder;
 
   protected volatile String baseApiUrl;
+
+  private volatile String webhookKey;
 
   @Override
   public void setBaseApiUrl(String baseUrl) {
@@ -90,6 +96,11 @@ public class WxCpRedisConfigImpl implements WxCpConfigStorage {
   }
 
   @Override
+  public Lock getAccessTokenLock() {
+    return new ReentrantLock();
+  }
+
+  @Override
   public boolean isAccessTokenExpired() {
     try (Jedis jedis = this.jedisPool.getResource()) {
       String expiresTimeStr = jedis.get(ACCESS_TOKEN_EXPIRES_TIME_KEY);
@@ -133,6 +144,11 @@ public class WxCpRedisConfigImpl implements WxCpConfigStorage {
   }
 
   @Override
+  public Lock getJsapiTicketLock() {
+    return new ReentrantLock();
+  }
+
+  @Override
   public boolean isJsapiTicketExpired() {
     try (Jedis jedis = this.jedisPool.getResource()) {
       String expiresTimeStr = jedis.get(JS_API_TICKET_EXPIRES_TIME_KEY);
@@ -168,6 +184,11 @@ public class WxCpRedisConfigImpl implements WxCpConfigStorage {
     try (Jedis jedis = this.jedisPool.getResource()) {
       return jedis.get(String.format(AGENT_JSAPI_TICKET_KEY, agentId));
     }
+  }
+
+  @Override
+  public Lock getAgentJsapiTicketLock() {
+    return new ReentrantLock();
   }
 
   @Override
@@ -318,6 +339,16 @@ public class WxCpRedisConfigImpl implements WxCpConfigStorage {
   @Override
   public ApacheHttpClientBuilder getApacheHttpClientBuilder() {
     return this.apacheHttpClientBuilder;
+  }
+
+  @Override
+  public boolean autoRefreshToken() {
+    return true;
+  }
+
+  @Override
+  public String getWebhookKey() {
+    return this.getWebhookKey();
   }
 
   public void setApacheHttpClientBuilder(ApacheHttpClientBuilder apacheHttpClientBuilder) {

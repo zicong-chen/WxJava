@@ -1,52 +1,57 @@
 package cn.binarywang.wx.miniapp.config.impl;
 
+import cn.binarywang.wx.miniapp.config.WxMaConfig;
+import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
+import lombok.Getter;
+import me.chanjar.weixin.common.bean.WxAccessToken;
+import me.chanjar.weixin.common.util.http.apache.ApacheHttpClientBuilder;
+
 import java.io.File;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
-import cn.binarywang.wx.miniapp.config.WxMaConfig;
-import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
-import me.chanjar.weixin.common.bean.WxAccessToken;
-import me.chanjar.weixin.common.util.http.apache.ApacheHttpClientBuilder;
 
 /**
  * 基于内存的微信配置provider，在实际生产环境中应该将这些配置持久化
  *
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
+@Getter
 public class WxMaDefaultConfigImpl implements WxMaConfig {
-  private volatile String msgDataFormat;
   protected volatile String appid;
-  private volatile String secret;
   protected volatile String token;
+  /**
+   * 小程序原始ID
+   */
+  protected volatile String originalId;
+  protected Lock accessTokenLock = new ReentrantLock();
+  /**
+   * 临时文件目录.
+   */
+  protected volatile File tmpDirFile;
+  private volatile String msgDataFormat;
+  private volatile String secret;
   private volatile String accessToken;
   private volatile String aesKey;
   private volatile long expiresTime;
-
+  /**
+   * 云环境ID
+   */
+  private volatile String cloudEnv;
   private volatile String httpProxyHost;
   private volatile int httpProxyPort;
   private volatile String httpProxyUsername;
   private volatile String httpProxyPassword;
-
   private volatile String jsapiTicket;
   private volatile long jsapiTicketExpiresTime;
-
   /**
    * 微信卡券的ticket单独缓存.
    */
   private volatile String cardApiTicket;
   private volatile long cardApiTicketExpiresTime;
-
-  protected Lock accessTokenLock = new ReentrantLock();
-  private Lock jsapiTicketLock = new ReentrantLock();
-  private Lock cardApiTicketLock = new ReentrantLock();
-
-  /**
-   * 临时文件目录.
-   */
-  protected volatile File tmpDirFile;
-
+  protected volatile Lock jsapiTicketLock = new ReentrantLock();
+  protected volatile Lock cardApiTicketLock = new ReentrantLock();
   private volatile ApacheHttpClientBuilder apacheHttpClientBuilder;
+  private String apiHostUrl;
 
   /**
    * 会过期的数据提前过期时间，默认预留200秒的时间
@@ -122,7 +127,6 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
     this.jsapiTicketExpiresTime = expiresAheadInMillis(expiresInSeconds);
   }
 
-
   @Override
   public String getCardApiTicket() {
     return this.cardApiTicket;
@@ -191,6 +195,24 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
   }
 
   @Override
+  public String getOriginalId() {
+    return originalId;
+  }
+
+  public void setOriginalId(String originalId) {
+    this.originalId = originalId;
+  }
+
+  @Override
+  public String getCloudEnv() {
+    return this.cloudEnv;
+  }
+
+  public void setCloudEnv(String cloudEnv) {
+    this.cloudEnv = cloudEnv;
+  }
+
+  @Override
   public String getMsgDataFormat() {
     return this.msgDataFormat;
   }
@@ -252,6 +274,11 @@ public class WxMaDefaultConfigImpl implements WxMaConfig {
   @Override
   public boolean autoRefreshToken() {
     return true;
+  }
+
+  @Override
+  public void setApiHostUrl(String apiHostUrl) {
+    this.apiHostUrl = apiHostUrl;
   }
 
   @Override

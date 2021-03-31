@@ -3,7 +3,7 @@ package me.chanjar.weixin.open.executor;
 import java.io.File;
 import java.io.IOException;
 
-import me.chanjar.weixin.common.WxType;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.RequestExecutor;
@@ -38,7 +38,7 @@ public abstract class MaQrCodeRequestExecutor<H, P> implements RequestExecutor<F
       case OK_HTTP:
         return new MaQrCodeOkhttpRequestExecutor(requestHttp);
       default:
-        throw new WxErrorException(WxError.builder().errorCode(-1).errorMsg("不支持的http框架").build());
+        throw new WxErrorException("不支持的http框架");
     }
   }
 

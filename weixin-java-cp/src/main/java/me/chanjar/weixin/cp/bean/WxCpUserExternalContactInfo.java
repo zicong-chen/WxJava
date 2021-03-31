@@ -119,6 +119,10 @@ public class WxCpUserExternalContactInfo {
     @SerializedName("remark_mobiles")
     private String[] remarkMobiles;
     private Tag[] tags;
+    @SerializedName("add_way")
+    private Integer addWay;
+    @SerializedName("oper_userid")
+    private String operUserid;
 
   }
 

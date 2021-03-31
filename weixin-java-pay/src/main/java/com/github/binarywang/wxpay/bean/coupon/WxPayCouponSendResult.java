@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.w3c.dom.Document;
 
+import java.io.Serializable;
+
 /**
  * <pre>
  * 发送代金券响应结果类
@@ -19,7 +21,9 @@ import org.w3c.dom.Document;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @XStreamAlias("xml")
-public class WxPayCouponSendResult extends BaseWxPayResult {
+public class WxPayCouponSendResult extends BaseWxPayResult implements Serializable {
+  private static final long serialVersionUID = -3596288305333090962L;
+
   /**
    * <pre>
    * 字段名：设备号
@@ -138,15 +142,15 @@ public class WxPayCouponSendResult extends BaseWxPayResult {
   private String retMsg;
 
   @Override
-  protected void loadXML(Document d) {
-    deviceInfo = readXMLString(d, "device_info");
-    couponStockId = readXMLString(d, "coupon_stock_id");
-    respCount = readXMLInteger(d, "resp_count");
-    successCount = readXMLInteger(d, "success_count");
-    failedCount = readXMLInteger(d, "failed_count");
-    openid = readXMLString(d, "openid");
-    retCode = readXMLString(d, "ret_code");
-    couponId = readXMLString(d, "coupon_id");
-    retMsg = readXMLString(d, "ret_msg");
+  protected void loadXml(Document d) {
+    deviceInfo = readXmlString(d, "device_info");
+    couponStockId = readXmlString(d, "coupon_stock_id");
+    respCount = readXmlInteger(d, "resp_count");
+    successCount = readXmlInteger(d, "success_count");
+    failedCount = readXmlInteger(d, "failed_count");
+    openid = readXmlString(d, "openid");
+    retCode = readXmlString(d, "ret_code");
+    couponId = readXmlString(d, "coupon_id");
+    retMsg = readXmlString(d, "ret_msg");
   }
 }

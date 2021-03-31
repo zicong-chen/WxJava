@@ -1,7 +1,6 @@
 package me.chanjar.weixin.common.util.http.apache;
 
-import me.chanjar.weixin.common.WxType;
-import me.chanjar.weixin.common.error.WxError;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.RequestHttp;
 import me.chanjar.weixin.common.util.http.SimplePostRequestExecutor;
@@ -42,22 +41,10 @@ public class ApacheSimplePostRequestExecutor extends SimplePostRequestExecutor<C
 
     try (CloseableHttpResponse response = requestHttp.getRequestHttpClient().execute(httpPost)) {
       String responseContent = Utf8ResponseHandler.INSTANCE.handleResponse(response);
-      if (responseContent.isEmpty()) {
-        throw new WxErrorException(WxError.builder().errorCode(9999).errorMsg("无响应内容").build());
-      }
-
-      if (responseContent.startsWith("<xml>")) {
-        //xml格式输出直接返回
-        return responseContent;
-      }
-
-      WxError error = WxError.fromJson(responseContent, wxType);
-      if (error.getErrorCode() != 0) {
-        throw new WxErrorException(error);
-      }
-      return responseContent;
+      return this.handleResponse(wxType, responseContent);
     } finally {
       httpPost.releaseConnection();
     }
   }
+
 }

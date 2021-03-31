@@ -1,15 +1,18 @@
 package me.chanjar.weixin.cp.api.impl;
 
 import com.google.common.collect.Maps;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.google.gson.reflect.TypeToken;
 import lombok.RequiredArgsConstructor;
 import me.chanjar.weixin.common.error.WxErrorException;
+import me.chanjar.weixin.common.util.json.GsonParser;
 import me.chanjar.weixin.cp.api.WxCpService;
 import me.chanjar.weixin.cp.api.WxCpUserService;
 import me.chanjar.weixin.cp.bean.WxCpInviteResult;
 import me.chanjar.weixin.cp.bean.WxCpUser;
-import me.chanjar.weixin.cp.bean.WxCpUserExternalContactInfo;
+import me.chanjar.weixin.cp.bean.external.contact.WxCpExternalContactInfo;
 import me.chanjar.weixin.cp.util.json.WxCpGsonBuilder;
 
 import java.util.List;
@@ -84,9 +87,9 @@ public class WxCpUserServiceImpl implements WxCpUserService {
 
     String url = this.mainService.getWxCpConfigStorage().getApiUrl(USER_LIST + departId);
     String responseContent = this.mainService.get(url, params);
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
+    JsonObject jsonObject = GsonParser.parse(responseContent);
     return WxCpGsonBuilder.create()
-      .fromJson(tmpJsonElement.getAsJsonObject().get("userlist"),
+      .fromJson(jsonObject.get("userlist"),
         new TypeToken<List<WxCpUser>>() {
         }.getType()
       );
@@ -107,10 +110,10 @@ public class WxCpUserServiceImpl implements WxCpUserService {
 
     String url = this.mainService.getWxCpConfigStorage().getApiUrl(USER_SIMPLE_LIST + departId);
     String responseContent = this.mainService.get(url, params);
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
+    JsonObject tmpJson = GsonParser.parse(responseContent);
     return WxCpGsonBuilder.create()
       .fromJson(
-        tmpJsonElement.getAsJsonObject().get("userlist"),
+        tmpJson.get("userlist"),
         new TypeToken<List<WxCpUser>>() {
         }.getType()
       );
@@ -158,14 +161,14 @@ public class WxCpUserServiceImpl implements WxCpUserService {
     }
 
     String responseContent = this.mainService.post(url, jsonObject.toString());
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
+    JsonObject tmpJson = GsonParser.parse(responseContent);
     Map<String, String> result = Maps.newHashMap();
-    if (tmpJsonElement.getAsJsonObject().get("openid") != null) {
-      result.put("openid", tmpJsonElement.getAsJsonObject().get("openid").getAsString());
+    if (tmpJson.get("openid") != null) {
+      result.put("openid", tmpJson.get("openid").getAsString());
     }
 
-    if (tmpJsonElement.getAsJsonObject().get("appid") != null) {
-      result.put("appid", tmpJsonElement.getAsJsonObject().get("appid").getAsString());
+    if (tmpJson.get("appid") != null) {
+      result.put("appid", tmpJson.get("appid").getAsString());
     }
 
     return result;
@@ -177,8 +180,8 @@ public class WxCpUserServiceImpl implements WxCpUserService {
     jsonObject.addProperty("openid", openid);
     String url = this.mainService.getWxCpConfigStorage().getApiUrl(USER_CONVERT_TO_USERID);
     String responseContent = this.mainService.post(url, jsonObject.toString());
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
-    return tmpJsonElement.getAsJsonObject().get("userid").getAsString();
+    JsonObject tmpJson = GsonParser.parse(responseContent);
+    return tmpJson.get("userid").getAsString();
   }
 
   @Override
@@ -187,14 +190,22 @@ public class WxCpUserServiceImpl implements WxCpUserService {
     jsonObject.addProperty("mobile", mobile);
     String url = this.mainService.getWxCpConfigStorage().getApiUrl(GET_USER_ID);
     String responseContent = this.mainService.post(url, jsonObject.toString());
-    JsonElement tmpJsonElement = new JsonParser().parse(responseContent);
-    return tmpJsonElement.getAsJsonObject().get("userid").getAsString();
+    JsonObject tmpJson = GsonParser.parse(responseContent);
+    return tmpJson.get("userid").getAsString();
   }
 
   @Override
-  public WxCpUserExternalContactInfo getExternalContact(String userId) throws WxErrorException {
+  public WxCpExternalContactInfo getExternalContact(String userId) throws WxErrorException {
     String url = this.mainService.getWxCpConfigStorage().getApiUrl(GET_EXTERNAL_CONTACT + userId);
     String responseContent = this.mainService.get(url, null);
-    return WxCpUserExternalContactInfo.fromJson(responseContent);
+    return WxCpExternalContactInfo.fromJson(responseContent);
+  }
+
+  @Override
+  public String getJoinQrCode(int sizeType) throws WxErrorException {
+    String url = this.mainService.getWxCpConfigStorage().getApiUrl(GET_JOIN_QR_CODE + sizeType);
+    String responseContent = this.mainService.get(url, null);
+    JsonObject tmpJson = GsonParser.parse(responseContent);
+    return tmpJson.get("join_qrcode").getAsString();
   }
 }

@@ -1,3 +1,6 @@
+.bash
+.history
+
 *.class
 test-output
 
@@ -50,3 +53,4 @@ sonar-project.properties
 
 # STS
 .factorypath
+*.zip

@@ -5,7 +5,7 @@ import jodd.http.HttpRequest;
 import jodd.http.HttpResponse;
 import jodd.http.ProxyInfo;
 import jodd.util.StringPool;
-import me.chanjar.weixin.common.WxType;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
@@ -14,6 +14,7 @@ import me.chanjar.weixin.common.util.http.RequestHttp;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * .
@@ -35,7 +36,7 @@ public class JoddHttpMediaUploadRequestExecutor extends MediaUploadRequestExecut
     request.withConnectionProvider(requestHttp.getRequestHttpClient());
     request.form("media", file);
     HttpResponse response = request.send();
-    response.charset(StringPool.UTF_8);
+    response.charset(StandardCharsets.UTF_8.name());
 
     String responseContent = response.bodyText();
     WxError error = WxError.fromJson(responseContent, wxType);

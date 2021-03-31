@@ -1,7 +1,10 @@
 package com.binarywang.spring.starter.wxjava.miniapp.properties;
 
+import com.binarywang.spring.starter.wxjava.miniapp.enums.HttpClientType;
+import com.binarywang.spring.starter.wxjava.miniapp.enums.StorageType;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 /**
  * 属性配置类.
@@ -36,4 +39,55 @@ public class WxMaProperties {
    * 消息格式，XML或者JSON.
    */
   private String msgDataFormat;
+
+  /**
+   * 存储策略
+   */
+  private final ConfigStorage configStorage = new ConfigStorage();
+
+  @Data
+  public static class ConfigStorage {
+
+    /**
+     * 存储类型.
+     */
+    private StorageType type = StorageType.Memory;
+
+    /**
+     * 指定key前缀.
+     */
+    private String keyPrefix = "wa";
+
+    /**
+     * redis连接配置.
+     */
+    @NestedConfigurationProperty
+    private final RedisProperties redis = new RedisProperties();
+
+    /**
+     * http客户端类型.
+     */
+    private HttpClientType httpClientType = HttpClientType.HttpClient;
+
+    /**
+     * http代理主机.
+     */
+    private String httpProxyHost;
+
+    /**
+     * http代理端口.
+     */
+    private Integer httpProxyPort;
+
+    /**
+     * http代理用户名.
+     */
+    private String httpProxyUsername;
+
+    /**
+     * http代理密码.
+     */
+    private String httpProxyPassword;
+  }
+
 }

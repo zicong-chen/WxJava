@@ -2,7 +2,6 @@ package com.github.binarywang.wxpay.bean.profitsharing;
 
 import com.github.binarywang.wxpay.bean.request.BaseWxPayRequest;
 import com.github.binarywang.wxpay.constant.WxPayConstants;
-import com.github.binarywang.wxpay.exception.WxPayException;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.*;
 import me.chanjar.weixin.common.annotation.Required;
@@ -66,8 +65,13 @@ public class ProfitSharingFinishRequest extends BaseWxPayRequest {
   private String description;
 
   @Override
-  protected void checkConstraints() throws WxPayException {
+  protected void checkConstraints() {
     this.setSignType(WxPayConstants.SignType.HMAC_SHA256);
+  }
+
+  @Override
+  protected boolean ignoreSubAppId() {
+    return true;
   }
 
   @Override

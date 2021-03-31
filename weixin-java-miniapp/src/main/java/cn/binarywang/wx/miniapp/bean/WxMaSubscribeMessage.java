@@ -1,6 +1,7 @@
 package cn.binarywang.wx.miniapp.bean;
 
-import cn.binarywang.wx.miniapp.util.json.WxMaGsonBuilder;
+import cn.binarywang.wx.miniapp.constant.WxMaConstants;
+import cn.binarywang.wx.miniapp.json.WxMaGsonBuilder;
 import lombok.*;
 
 import java.io.Serializable;
@@ -59,9 +60,19 @@ public class WxMaSubscribeMessage implements Serializable {
    * 描述： 模板内容，不填则下发空模板
    * </pre>
    */
-  private List<Data> data;
+  private List<MsgData> data;
 
-  public WxMaSubscribeMessage addData(Data datum) {
+  /**
+   * 跳转小程序类型：developer为开发版；trial为体验版；formal为正式版；默认为正式版
+   */
+  private String miniprogramState = WxMaConstants.MiniProgramState.FORMAL;
+
+  /**
+   * 进入小程序查看的语言类型，支持zh_CN(简体中文)、en_US(英文)、zh_HK(繁体中文)、zh_TW(繁体中文)，默认为zh_CN
+   */
+  private String lang = WxMaConstants.MiniProgramLang.ZH_CN;
+
+  public WxMaSubscribeMessage addData(MsgData datum) {
     if (this.data == null) {
       this.data = new ArrayList<>();
     }
@@ -75,10 +86,10 @@ public class WxMaSubscribeMessage implements Serializable {
     return WxMaGsonBuilder.create().toJson(this);
   }
 
-  @lombok.Data
+  @Data
   @NoArgsConstructor
   @AllArgsConstructor
-  public static class Data implements Serializable {
+  public static class MsgData implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private String name;

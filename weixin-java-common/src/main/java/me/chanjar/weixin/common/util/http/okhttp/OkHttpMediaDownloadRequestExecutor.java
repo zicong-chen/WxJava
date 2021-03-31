@@ -1,7 +1,7 @@
 package me.chanjar.weixin.common.util.http.okhttp;
 
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.WxType;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.BaseMediaDownloadRequestExecutor;
@@ -14,8 +14,6 @@ import okio.BufferedSink;
 import okio.Okio;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,8 +56,13 @@ public class OkHttpMediaDownloadRequestExecutor extends BaseMediaDownloadRequest
       return null;
     }
 
+    String baseName = FilenameUtils.getBaseName(fileName);
+    if (StringUtils.isBlank(fileName) || baseName.length() < 3) {
+      baseName = String.valueOf(System.currentTimeMillis());
+    }
+
     File file = File.createTempFile(
-      FilenameUtils.getBaseName(fileName), "." + FilenameUtils.getExtension(fileName), super.tmpDirFile
+      baseName, "." + FilenameUtils.getExtension(fileName), super.tmpDirFile
     );
 
     try (BufferedSink sink = Okio.buffer(Okio.sink(file))) {

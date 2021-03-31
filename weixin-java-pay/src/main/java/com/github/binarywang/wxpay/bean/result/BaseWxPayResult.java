@@ -1,37 +1,35 @@
 package com.github.binarywang.wxpay.bean.result;
 
-import java.io.ByteArrayInputStream;
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import com.github.binarywang.wxpay.util.XmlConfig;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.NodeList;
-
 import com.github.binarywang.wxpay.constant.WxPayConstants;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.github.binarywang.wxpay.util.SignUtils;
+import com.github.binarywang.wxpay.util.XmlConfig;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import lombok.Data;
+import me.chanjar.weixin.common.error.WxRuntimeException;
 import me.chanjar.weixin.common.util.json.WxGsonBuilder;
 import me.chanjar.weixin.common.util.xml.XStreamInitializer;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <pre>
@@ -42,7 +40,7 @@ import org.w3c.dom.*;
  * @author <a href="https://github.com/binarywang">Binary Wang</a>
  */
 @Data
-public abstract class BaseWxPayResult implements Serializable {
+public abstract class BaseWxPayResult {
   /**
    * 返回状态码.
    */
@@ -139,10 +137,10 @@ public abstract class BaseWxPayResult implements Serializable {
         t.setXmlString(xmlString);
         Document doc = t.getXmlDoc();
         t.loadBasicXML(doc);
-        t.loadXML(doc);
+        t.loadXml(doc);
         return (T) t;
       } catch (Exception e) {
-        throw new RuntimeException("parse xml error", e);
+        throw new WxRuntimeException("parse xml error", e);
       }
     }
     XStream xstream = XStreamInitializer.getInstance();
@@ -157,7 +155,7 @@ public abstract class BaseWxPayResult implements Serializable {
    *
    * @param d Document
    */
-  protected abstract void loadXML(Document d);
+  protected abstract void loadXml(Document d);
 
   /**
    * 从XML文档中加载基础属性
@@ -165,39 +163,45 @@ public abstract class BaseWxPayResult implements Serializable {
    * @param d Document
    */
   private void loadBasicXML(Document d) {
-    returnCode = readXMLString(d, "return_code");
-    returnMsg = readXMLString(d, "return_msg");
-    resultCode = readXMLString(d, "result_code");
-    errCode = readXMLString(d, "err_code");
-    errCodeDes = readXMLString(d, "err_code_des");
-    appid = readXMLString(d, "appid");
-    mchId = readXMLString(d, "mch_id");
-    subAppId = readXMLString(d, "sub_appid");
-    subMchId = readXMLString(d, "sub_mch_id");
-    nonceStr = readXMLString(d, "nonce_str");
-    sign = readXMLString(d, "sign");
+    returnCode = readXmlString(d, "return_code");
+    returnMsg = readXmlString(d, "return_msg");
+    resultCode = readXmlString(d, "result_code");
+    errCode = readXmlString(d, "err_code");
+    errCodeDes = readXmlString(d, "err_code_des");
+    appid = readXmlString(d, "appid");
+    mchId = readXmlString(d, "mch_id");
+    subAppId = readXmlString(d, "sub_appid");
+    subMchId = readXmlString(d, "sub_mch_id");
+    nonceStr = readXmlString(d, "nonce_str");
+    sign = readXmlString(d, "sign");
   }
 
-  public static Integer readXMLInteger(Node d, String tagName) {
-    String content = readXMLString(d, tagName);
-    if (content == null || content.trim().length() == 0) return null;
+  protected static Integer readXmlInteger(Node d, String tagName) {
+    String content = readXmlString(d, tagName);
+    if (content == null || content.trim().length() == 0) {
+      return null;
+    }
     return Integer.parseInt(content);
   }
 
-  public static String readXMLString(Node d, String tagName) {
-    if (!d.hasChildNodes()) return null;
+  protected static String readXmlString(Node d, String tagName) {
+    if (!d.hasChildNodes()) {
+      return null;
+    }
     NodeList childNodes = d.getChildNodes();
     for (int i = 0, j = childNodes.getLength(); i < j; i++) {
       Node node = childNodes.item(i);
       if (tagName.equals(node.getNodeName())) {
-        if (!node.hasChildNodes()) return null;
+        if (!node.hasChildNodes()) {
+          return null;
+        }
         return node.getFirstChild().getNodeValue();
       }
     }
     return null;
   }
 
-  public static String readXMLString(Document d, String tagName) {
+  public static String readXmlString(Document d, String tagName) {
     NodeList elements = d.getElementsByTagName(tagName);
     if (elements == null || elements.getLength() == 0) {
       return null;
@@ -210,9 +214,12 @@ public abstract class BaseWxPayResult implements Serializable {
     return node.getNodeValue();
   }
 
-  public static Integer readXMLInteger(Document d, String tagName) {
-    String content = readXMLString(d, tagName);
-    if (content == null || content.trim().length() == 0) return null;
+  protected static Integer readXmlInteger(Document d, String tagName) {
+    String content = readXmlString(d, tagName);
+    if (content == null || content.trim().length() == 0) {
+      return null;
+    }
+
     return Integer.parseInt(content);
   }
 
@@ -237,7 +244,7 @@ public abstract class BaseWxPayResult implements Serializable {
    */
   public Map<String, String> toMap() {
     if (StringUtils.isBlank(this.xmlString)) {
-      throw new RuntimeException("xml数据有问题，请核实！");
+      throw new WxRuntimeException("xml数据有问题，请核实！");
     }
 
     Map<String, String> result = Maps.newHashMap();
@@ -252,7 +259,7 @@ public abstract class BaseWxPayResult implements Serializable {
         result.put(list.item(i).getNodeName(), list.item(i).getTextContent());
       }
     } catch (XPathExpressionException e) {
-      throw new RuntimeException("非法的xml文本内容：" + xmlString);
+      throw new WxRuntimeException("非法的xml文本内容：" + xmlString);
     }
 
     return result;
@@ -276,7 +283,7 @@ public abstract class BaseWxPayResult implements Serializable {
       factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
       return factory.newDocumentBuilder().parse(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)));
     } catch (Exception e) {
-      throw new RuntimeException("非法的xml文本内容：\n" + this.xmlString, e);
+      throw new WxRuntimeException("非法的xml文本内容：\n" + this.xmlString, e);
     }
   }
 
@@ -296,7 +303,7 @@ public abstract class BaseWxPayResult implements Serializable {
         .compile(expression)
         .evaluate(doc, XPathConstants.STRING);
     } catch (XPathExpressionException e) {
-      throw new RuntimeException("未找到相应路径的文本：" + expression);
+      throw new WxRuntimeException("未找到相应路径的文本：" + expression);
     }
   }
 

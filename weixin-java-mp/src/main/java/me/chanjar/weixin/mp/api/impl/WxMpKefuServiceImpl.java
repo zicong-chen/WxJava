@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.result.WxMediaUploadResult;
-import me.chanjar.weixin.common.error.WxError;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.MediaUploadRequestExecutor;
 import me.chanjar.weixin.mp.api.WxMpKefuService;
@@ -29,8 +28,12 @@ public class WxMpKefuServiceImpl implements WxMpKefuService {
 
   @Override
   public boolean sendKefuMessage(WxMpKefuMessage message) throws WxErrorException {
-    String responseContent = this.wxMpService.post(MESSAGE_CUSTOM_SEND, message.toJson());
-    return responseContent != null;
+    return this.sendKefuMessageWithResponse(message) != null;
+  }
+
+  @Override
+  public String sendKefuMessageWithResponse(WxMpKefuMessage message) throws WxErrorException {
+    return this.wxMpService.post(MESSAGE_CUSTOM_SEND, message.toJson());
   }
 
   @Override
@@ -115,11 +118,11 @@ public class WxMpKefuServiceImpl implements WxMpKefuService {
   @Override
   public WxMpKfMsgList kfMsgList(Date startTime, Date endTime, Long msgId, Integer number) throws WxErrorException {
     if (number > 10000) {
-      throw new WxErrorException(WxError.builder().errorCode(-1).errorMsg("非法参数请求，每次最多查询10000条记录！").build());
+      throw new WxErrorException("非法参数请求，每次最多查询10000条记录！");
     }
 
     if (startTime.after(endTime)) {
-      throw new WxErrorException(WxError.builder().errorCode(-1).errorMsg("起始时间不能晚于结束时间！").build());
+      throw new WxErrorException("起始时间不能晚于结束时间！");
     }
 
     JsonObject param = new JsonObject();

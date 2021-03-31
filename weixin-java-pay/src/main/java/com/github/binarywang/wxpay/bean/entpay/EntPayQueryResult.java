@@ -7,6 +7,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.w3c.dom.Document;
 
+import java.io.Serializable;
+
 /**
  * <pre>
  * 企业付款查询返回结果.
@@ -19,7 +21,7 @@ import org.w3c.dom.Document;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @XStreamAlias("xml")
-public class EntPayQueryResult extends BaseWxPayResult {
+public class EntPayQueryResult extends BaseWxPayResult implements Serializable {
   private static final long serialVersionUID = 3948485732447456947L;
 
   /**
@@ -83,16 +85,16 @@ public class EntPayQueryResult extends BaseWxPayResult {
   private String desc;
 
   @Override
-  protected void loadXML(Document d) {
-    partnerTradeNo = readXMLString(d, "partner_trade_no");
-    detailId = readXMLString(d, "detail_id");
-    status = readXMLString(d, "status");
-    reason = readXMLString(d, "reason");
-    openid = readXMLString(d, "openid");
-    transferName = readXMLString(d, "transfer_name");
-    paymentAmount = readXMLInteger(d, "payment_amount");
-    transferTime = readXMLString(d, "transfer_time");
-    paymentTime = readXMLString(d, "payment_time");
-    desc = readXMLString(d, "desc");
+  protected void loadXml(Document d) {
+    partnerTradeNo = readXmlString(d, "partner_trade_no");
+    detailId = readXmlString(d, "detail_id");
+    status = readXmlString(d, "status");
+    reason = readXmlString(d, "reason");
+    openid = readXmlString(d, "openid");
+    transferName = readXmlString(d, "transfer_name");
+    paymentAmount = readXmlInteger(d, "payment_amount");
+    transferTime = readXmlString(d, "transfer_time");
+    paymentTime = readXmlString(d, "payment_time");
+    desc = readXmlString(d, "desc");
   }
 }

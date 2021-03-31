@@ -1,7 +1,6 @@
 package me.chanjar.weixin.common.util.http.okhttp;
 
-import me.chanjar.weixin.common.WxType;
-import me.chanjar.weixin.common.error.WxError;
+import me.chanjar.weixin.common.enums.WxType;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.util.http.RequestHttp;
 import me.chanjar.weixin.common.util.http.SimpleGetRequestExecutor;
@@ -35,12 +34,7 @@ public class OkHttpSimpleGetRequestExecutor extends SimpleGetRequestExecutor<OkH
     OkHttpClient client = requestHttp.getRequestHttpClient();
     Request request = new Request.Builder().url(uri).build();
     Response response = client.newCall(request).execute();
-    String responseContent = response.body().string();
-    WxError error = WxError.fromJson(responseContent, wxType);
-    if (error.getErrorCode() != 0) {
-      throw new WxErrorException(error);
-    }
-    return responseContent;
+    return this.handleResponse(wxType, response.body().string());
   }
 
 }
